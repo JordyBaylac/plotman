@@ -68,15 +68,32 @@ def phases_permit_new_job(phases, d, sched_cfg, dir_cfg):
 
     return True
 
-def drive_can_hold_new_plot(directory, plotting_cfg):                  
+def to_gigabytes(bytes):
+    return bytes/plot_util.GB;
+
+def drive_can_hold_new_plot(directory, dir_cfg, plotting_cfg):
+    reason = ''
+    jobs = job.Job.get_running_jobs(dir_cfg.log)
     max_plot_size_by_k = {
-        32 : 116930484634,  #108.9GB
-        33 : 240732916941,  #224.2GB
-        34 : 495531851776,  #461.5GB
-        35 : 1019303113524, #949.3GB
+        32 : 108.9 * plot_util.GB,
+        33 : 224.2 * plot_util.GB,
+        34 : 461.5 * plot_util.GB,
+        35 : 949.3 * plot_util.GB,
     }
+    plot_size = max_plot_size_by_k[plotting_cfg.k]
+
     (_, _, free) = shutil.disk_usage(directory) 
-    return free > max_plot_size_by_k[plotting_cfg.k]
+    dst_phases = job.job_phases_for_dstdir(directory, jobs)
+    required_space = (len(dst_phases)+1) * plot_size            
+    has_space = required_space < free
+        
+    if has_space is False:
+        reason += f'  Destination directory {directory}, currently in {len(dst_phases)} phases, does not have space for a new plot\n'
+        reason += f'  Required: {to_gigabytes(required_space):10.1f}, Free space (GB): {to_gigabytes(free):10.1f}\n'
+        reason += f'  NOTE: for now, it will be removed from config in memory, make sure to remove it yourself from plotman.yaml config (dst section) later on.\n'
+        del dir_cfg.dst[dir_cfg.dst.index(directory)]
+
+    return (has_space, reason)
 
 def kill_frozen_jobs(dir_cfg):
     jobs = job.Job.get_running_jobs(dir_cfg.log)
@@ -114,18 +131,13 @@ def maybe_start_new_plot(dir_cfg, sched_cfg, plotting_cfg):
 
             # Select the dst dir least recently selected
             dir2ph = { d:ph for (d, ph) in dstdirs_to_youngest_phase(jobs).items()
-                      if d in dir_cfg.dst and drive_can_hold_new_plot(d, plotting_cfg)}
-            unused_dirs = [d for d in dir_cfg.dst if d not in dir2ph.keys() and drive_can_hold_new_plot(d, plotting_cfg)]
+                      if d in dir_cfg.dst and drive_can_hold_new_plot(d, dir_cfg, plotting_cfg)[0]}
+            unused_dirs = [d for d in dir_cfg.dst if d not in dir2ph.keys() and drive_can_hold_new_plot(d, dir_cfg, plotting_cfg)[0]]
             dstdir = ''
             if unused_dirs: 
                 dstdir = random.choice(unused_dirs)
             else:
                 dstdir = max(dir2ph, key=dir2ph.get)
-
-            if drive_can_hold_new_plot(dstdir, plotting_cfg) is False:
-                wait_reason = 'destination %s does not have enough space' % (dstdir)
-                print(wait_reason)
-                return (False, wait_reason)
 
             logfile = os.path.join(
                 dir_cfg.log, pendulum.now().isoformat(timespec='microseconds').replace(':', '_') + '.log'

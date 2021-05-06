@@ -137,8 +137,12 @@ def main():
     cfg = configuration.get_validated_configs()
 
     if args.cmd == 'check':
-        for dirdst in cfg.directories.dst:
-            print(dirdst + " has free space?: "+ ("YES" if manager.drive_can_hold_new_plot(dirdst, cfg.plotting) else "NOP"))
+        for d in cfg.directories.dst:
+            (has, reason) = manager.drive_can_hold_new_plot(d, cfg.directories, cfg.plotting)
+            print(d + " has free space?: "+ ("YES" if has else "NOP"))
+            if has is False:
+                print(reason)
+                
         return
 
     #
