@@ -353,6 +353,9 @@ class Job:
         else:
             return self.proc.status()
 
+    def get_created_time(self):
+        return datetime.fromtimestamp(self.proc.create_time()) 
+
     def get_time_wall(self):
         create_time = datetime.fromtimestamp(self.proc.create_time())
         return int((datetime.now() - create_time).total_seconds())
@@ -413,5 +416,5 @@ class Job:
         for f in temp_files:
             os.remove(f)
 
-        print('> killed plot %s with dst %s' % (self.plot_id_prefix(), self.dstdir))
+        return True
     

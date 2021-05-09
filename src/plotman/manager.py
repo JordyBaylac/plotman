@@ -103,7 +103,8 @@ def kill_frozen_jobs(dir_cfg):
         print(str(len(frozen_jobs)) + ' frozen jobs detected')
 
     for j in frozen_jobs:
-        j.kill()
+        if j.kill():
+            print ('killed plot %s with dst %s, created at %s' % (j.plot_id_prefix(), j.dstdir, j.get_created_time().strftime("%I:%M %p on %b %d")))
 
 def maybe_start_new_plot(dir_cfg, sched_cfg, plotting_cfg):
     jobs = job.Job.get_running_jobs(dir_cfg.log)
