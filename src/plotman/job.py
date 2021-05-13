@@ -101,7 +101,7 @@ class Job:
     # These are dynamic, cached, and need to be udpated periodically
     phase = (None, None)   # Phase/subphase
 
-    last_updated_time_in_min = 0
+    time_without_updates_in_min = 0
 
     def get_running_jobs(logroot, cached_jobs=()):
         '''Return a list of running plot jobs.  If a cache of preexisting jobs is provided,
@@ -294,12 +294,12 @@ class Job:
     
     def check_freeze(self):
         assert self.logfile
-        updatedAt = os.path.getmtime(self.logfile)
+        updated_at = os.path.getmtime(self.logfile)
         now = datetime.now().timestamp() 
-        self.last_updated_time_in_min = int((now-updatedAt)/60)
+        self.time_without_updates_in_min = int((now-updated_at)/60)
     
     def is_frozen(self):
-        return self.last_updated_time_in_min > 60
+        return self.time_without_updates_in_min > 60
 
     def progress(self):
         '''Return a 2-tuple with the job phase and subphase (by reading the logfile)'''
@@ -355,6 +355,13 @@ class Job:
 
     def get_created_time(self):
         return datetime.fromtimestamp(self.proc.create_time()) 
+    
+    def get_updated_time(self):
+        updated_at = os.path.getmtime(self.logfile)
+        return datetime.fromtimestamp(updated_at)
+
+    def get_frozen_time_in_mins(self):
+        return self.time_without_updates_in_min
 
     def get_time_wall(self):
         create_time = datetime.fromtimestamp(self.proc.create_time())

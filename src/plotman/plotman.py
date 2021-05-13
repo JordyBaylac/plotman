@@ -141,7 +141,10 @@ def main():
             (has, reason) = manager.drive_can_hold_new_plot(d, cfg.directories, cfg.plotting)
             print(d + " has free space?: "+ ("YES" if has else "NOP"))
             if has is False:
-                print(reason)           
+                print(reason)    
+
+        
+        manager.clean_old_files(cfg.directories)       
         return
 
     #

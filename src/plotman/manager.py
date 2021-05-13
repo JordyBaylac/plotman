@@ -71,6 +71,19 @@ def phases_permit_new_job(phases, d, sched_cfg, dir_cfg):
 def to_gigabytes(bytes):
     return bytes/plot_util.GB;
 
+def clean_old_files(dir_cfg):
+    jobs = job.Job.get_running_jobs(dir_cfg.log)
+    plots_id = [j.plot_id for j in jobs]
+    temp_files = [f for d in dir_cfg.tmp for f in os.listdir(d)]
+    cant = 0
+    for f in temp_files:
+        if (id in f for id in plots_id):
+            cant += 1 # print("file %s is not used in any current job" % (f)) 
+    
+    print("Same" if cant == len(temp_files) else "Nop (%s vs %s)"%(cant, len(temp_files)))
+
+        
+
 def drive_can_hold_new_plot(directory, dir_cfg, plotting_cfg):
     reason = ''
     jobs = job.Job.get_running_jobs(dir_cfg.log)
@@ -100,11 +113,17 @@ def kill_frozen_jobs(dir_cfg):
     frozen_jobs = [j for j in jobs if j.is_frozen()]
 
     if len(frozen_jobs) > 0:
-        print(str(len(frozen_jobs)) + ' frozen jobs detected')
+        print(str(len(frozen_jobs)) + ' frozen jobs detected:')
 
     for j in frozen_jobs:
         if j.kill():
-            print ('killed plot %s with dst %s, created at %s' % (j.plot_id_prefix(), j.dstdir, j.get_created_time().strftime("%I:%M %p on %b %d")))
+            created_at = j.get_created_time().strftime("%I:%M %p on %b %d")
+            last_update = j.get_updated_time().strftime("%I:%M %p")
+            frozen_time_in_mins = j.get_frozen_time_in_mins()
+            print ('> killed plot %s at phase %s, destined for %s' % (j.plot_id_prefix(), j.phase, j.dstdir))
+            print ('  - created at:  %s' % (created_at))
+            print ('  - updated at:  %s' % (last_update))
+            print ('  - frozen time: %s' % (frozen_time_in_mins))
 
 def maybe_start_new_plot(dir_cfg, sched_cfg, plotting_cfg):
     jobs = job.Job.get_running_jobs(dir_cfg.log)
