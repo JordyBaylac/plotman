@@ -134,7 +134,9 @@ def main():
             print("No action requested, add 'generate' or 'path'.")
             return
 
-    cfg = configuration.get_validated_configs()
+    config_path = configuration.get_path()
+    config_text = configuration.read_configuration_text(config_path)
+    cfg = configuration.get_validated_configs(config_text, config_path)
 
     if args.cmd == 'check':
         for d in cfg.directories.dst:

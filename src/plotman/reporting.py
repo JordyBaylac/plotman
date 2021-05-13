@@ -13,10 +13,11 @@ def abbr_path(path, putative_prefix):
     else:
         return path
     
-def phase_str(phase_pair):
-    (ph, subph) = phase_pair
-    return ((str(ph) if ph is not None else '?') + ':'
-            + (str(subph) if subph is not None else '?'))
+def phase_str(phase):
+    if not phase.known:
+        return '?:?'
+
+    return f'{phase.major}:{phase.minor}'
 
 def phases_str(phases, max_num=None):
     '''Take a list of phase-subphase pairs and return them as a compact string'''
@@ -50,15 +51,15 @@ def job_viz(jobs):
     result = ''
     result += '1'
     for i in range(0, 8):
-        result += n_to_char(n_at_ph(jobs, (1, i)))
+        result += n_to_char(n_at_ph(jobs, job.Phase(1, i)))
     result += '2'
     for i in range(0, 8):
-        result += n_to_char(n_at_ph(jobs, (2, i)))
+        result += n_to_char(n_at_ph(jobs, job.Phase(2, i)))
     result += '3'
     for i in range(0, 7):
-        result += n_to_char(n_at_ph(jobs, (3, i)))
+        result += n_to_char(n_at_ph(jobs, job.Phase(3, i)))
     result += '4'
-    result += n_to_char(n_at_ph(jobs, (4, 0)))
+    result += n_to_char(n_at_ph(jobs, job.Phase(4, 0)))
     return result
 
 def status_report(jobs, width, height=None, tmp_prefix='', dst_prefix=''):
@@ -138,7 +139,7 @@ def tmp_dir_report(jobs, dir_cfg, sched_cfg, width, start_row=None, end_row=None
             continue
         phases = sorted(job.job_phases_for_tmpdir(d, jobs))
         ready = manager.phases_permit_new_job(phases, d, sched_cfg, dir_cfg)
-        row = [abbr_path(d, prefix), 'OK' if ready else '--', phases_str(phases)]
+        row = [abbr_path(d, prefix), 'OK' if ready else '--', phases_str(phases, 5)]
         tab.add_row(row)
 
     tab.set_max_width(width)
@@ -157,7 +158,7 @@ def dst_dir_report(jobs, dstdirs, width, prefix=''):
     for d in sorted(dstdirs):
         # TODO: This logic is replicated in archive.py's priority computation,
         # maybe by moving more of the logic in to directory.py
-        eldest_ph = dir2oldphase.get(d, (0, 0))
+        eldest_ph = dir2oldphase.get(d, job.Phase(0, 0))
         phases = job.job_phases_for_dstdir(d, jobs)
 
         dir_plots = plot_util.list_k32_plots(d)
