@@ -161,7 +161,7 @@ def maybe_start_new_plot(dir_cfg, sched_cfg, plotting_cfg):
             dstdir = ''
             if unused_dirs: 
                 dstdir = random.choice(unused_dirs)
-            else:
+            elif len(dir2ph) > 0:
                 dstdir = max(dir2ph, key=dir2ph.get)
 
             logfile = os.path.join(
