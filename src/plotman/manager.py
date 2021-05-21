@@ -163,7 +163,10 @@ def maybe_start_new_plot(dir_cfg, sched_cfg, plotting_cfg):
                 dstdir = random.choice(unused_dirs)
             elif len(dir2ph) > 0:
                 dstdir = max(dir2ph, key=dir2ph.get)
-
+            else:
+                wait_reason = 'no destination drive available'
+                return (False, wait_reason)
+                
             logfile = os.path.join(
                 dir_cfg.log, pendulum.now().isoformat(timespec='microseconds').replace(':', '_') + '.log'
             )
