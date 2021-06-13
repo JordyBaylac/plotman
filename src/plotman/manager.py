@@ -171,15 +171,20 @@ def maybe_start_new_plot(dir_cfg, sched_cfg, plotting_cfg):
                 dir_cfg.log, pendulum.now().isoformat(timespec='microseconds').replace(':', '_') + '.log'
             )
 
-            plot_args = ['chia', 'plots', 'create',
-                    '-k', str(plotting_cfg.k),
+            # plot_args = ['chia', 'plots', 'create',
+            #         '-k', str(plotting_cfg.k),
+            #         '-r', str(plotting_cfg.n_threads),
+            #         '-u', str(plotting_cfg.n_buckets),
+            #         '-b', str(plotting_cfg.job_buffer),
+            #         '-t', tmpdir,
+            #         '-d', dstdir ]
+            plot_args = ['~/chia-plotter/build/chia_plot',
                     '-r', str(plotting_cfg.n_threads),
                     '-u', str(plotting_cfg.n_buckets),
-                    '-b', str(plotting_cfg.job_buffer),
                     '-t', tmpdir,
-                    '-d', dstdir ]
-            if plotting_cfg.e:
-                plot_args.append('-e')
+                    '-d', dstdir]
+            # if plotting_cfg.e:
+            #     plot_args.append('-e')
             if plotting_cfg.farmer_pk is not None:
                 plot_args.append('-f')
                 plot_args.append(plotting_cfg.farmer_pk)

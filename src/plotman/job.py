@@ -44,18 +44,21 @@ def parse_chia_plot_time(s):
 
 def parse_chia_plots_create_command_line(command_line):
     command_line = list(command_line)
-    # Parse command line args
-    if 'python' in command_line[0].lower():
-        command_line = command_line[1:]
-    assert len(command_line) >= 3
-    assert 'chia' in command_line[0]
-    assert 'plots' == command_line[1]
-    assert 'create' == command_line[2]
 
-    all_command_arguments = command_line[3:]
+    if 'chia_plot' not in arg.lower() for arg in command_line:
+        return ParsedChiaPlotsCreateCommand(error="not a madmax plotter process")
+    # Parse command line args
+    # if 'python' in command_line[0].lower():
+    #     command_line = command_line[1:]
+    # assert len(command_line) >= 3
+    # assert 'chia' in command_line[0]
+    # assert 'plots' == command_line[1]
+    # assert 'create' == command_line[2]    
+
+    # all_command_arguments = command_line[3:]
+    all_command_arguments = command_line[1:]
 
     # nice idea, but this doesn't include -h
-    # help_option_names = command.get_help_option_names(ctx=context)
     help_option_names = {'--help', '-h'}
 
     command_arguments = [
@@ -67,7 +70,8 @@ def parse_chia_plots_create_command_line(command_line):
     # TODO: We could at some point do chia version detection and pick the
     #       associated command.  For now we'll just use the latest one we have
     #       copied.
-    command = chia.commands.latest_command()
+    # command = chia.commands.latest_command()
+    command = madmax.commands.latest_command()
     try:
         context = command.make_context(info_name='', args=list(command_arguments))
     except click.ClickException as e:
@@ -198,14 +202,20 @@ class Job:
         #     'exclude_final_dir': False,
         # }
 
-        self.k = self.args['size']
-        self.r = self.args['num_threads']
+        # self.n = self.args['num']
+        self.n = self.args['count']
+        # self.r = self.args['num_threads']
+        self.r = self.args['threads']
+        # self.u = self.args['buckets']
         self.u = self.args['buckets']
-        self.b = self.args['buffer']
-        self.n = self.args['num']
-        self.tmpdir = self.args['tmp_dir']
-        self.tmp2dir = self.args['tmp2_dir']
-        self.dstdir = self.args['final_dir']
+        # self.tmpdir = self.args['tmp_dir']
+        self.tmpdir = self.args['tmpdir']
+        # self.tmp2dir = self.args['tmp2_dir']
+        self.tmp2dir = self.args['tmpdir2']
+        # self.dstdir = self.args['final_dir']
+        self.dstdir = self.args['finaldir']
+        self.k = "32"   #self.args['size']
+        self.b = "4000" #self.args['buffer']
 
         plot_cwd = self.proc.cwd()
         self.tmpdir = os.path.join(plot_cwd, self.tmpdir)
@@ -241,32 +251,23 @@ class Job:
         # Try reading for a while; it can take a while for the job to get started as it scans
         # existing plot dirs (especially if they are NFS).
         found_id = False
-        found_log = False
         for attempt_number in range(3):
             with open(self.logfile, 'r') as f:
                 for line in f:
-                    m = re.match('^ID: ([0-9a-f]*)', line)
+                    # m = re.match('^ID: ([0-9a-f]*)', line)
+                    m = re.match('^Plot Name: (.*)', line)
                     if m:
-                        self.plot_id = m.group(1)
+                        # self.plot_id = m.group(1)
+                        filename_parts = m.group(1).split("-")
+                        self.plot_id = filename_parts[-1]
                         found_id = True
-                    m = re.match(r'^Starting phase 1/4:.*\.\.\. (.*)', line)
-                    if m:
-                        # Mon Nov  2 08:39:53 2020
-                        self.start_time = parse_chia_plot_time(m.group(1))
-                        found_log = True
-                        break  # Stop reading lines in file
 
-            if found_id and found_log:
+            if found_id:
                 break  # Stop trying
             else:
                 time.sleep(1)  # Sleep and try again
 
-        # If we couldn't find the line in the logfile, the job is probably just getting started
-        # (and being slow about it).  In this case, use the last metadata change as the start time.
-        # TODO: we never come back to this; e.g. plot_id may remain uninitialized.
-        # TODO: should we just use the process start time instead?
-        if not found_log:
-            self.start_time = datetime.fromtimestamp(os.path.getctime(self.logfile))
+        self.start_time = datetime.fromtimestamp(os.path.getctime(self.logfile))
 
         # Load things from logfile that are dynamic
         self.update_from_logfile()
@@ -287,26 +288,56 @@ class Job:
 
         with open(self.logfile, 'r') as f:
             for line in f:
-                # "Starting phase 1/4: Forward Propagation into tmp files... Sat Oct 31 11:27:04 2020"
-                m = re.match(r'^Starting phase (\d).*', line)
-                if m:
-                    phase = int(m.group(1))
-                    phase_subphases[phase] = 0
+                # # "Starting phase 1/4: Forward Propagation into tmp files... Sat Oct 31 11:27:04 2020"
+                # m = re.match(r'^Starting phase (\d).*', line)
+                # if m:
+                #     phase = int(m.group(1))
+                #     phase_subphases[phase] = 0                
 
-                # Phase 1: "Computing table 2"
-                m = re.match(r'^Computing table (\d).*', line)
+                # subphases of phase 1
+                m = re.match(r'^\[P1\] Table (\d) took.*', line)
                 if m:
                     phase_subphases[1] = max(phase_subphases[1], int(m.group(1)))
 
-                # Phase 2: "Backpropagating on table 2"
-                m = re.match(r'^Backpropagating on table (\d).*', line)
+                # subphases of phase 2
+                m = re.match(r'^\[P2\] Table (\d) scan took.*', line)
                 if m:
                     phase_subphases[2] = max(phase_subphases[2], 7 - int(m.group(1)))
 
-                # Phase 3: "Compressing tables 4 and 5"
-                m = re.match(r'^Compressing tables (\d) and (\d).*', line)
+                # subphases of phase 3
+                m = re.match(r'^\[P3-\d\] Table (\d) took.*', line)
                 if m:
                     phase_subphases[3] = max(phase_subphases[3], int(m.group(1)))
+
+                # start of phase 4
+                m = re.match(r'^\[P4\] Starting to write C1 and C3 tables*', line)
+                if m:
+                    phase_subphases[4] = 0
+
+                # subphases of phase 4
+                m = re.match(r'^\[P4\] Finished writing C1 and C3 tables*', line)
+                if m:
+                    phase_subphases[4] = 1
+
+                # subphases of phase 4
+                m = re.match(r'^\[P4\] Finished writing C2 table*', line)
+                if m:
+                    phase_subphases[4] = 2
+
+                # # Phase 1: "Computing table 2"
+                # m = re.match(r'^Computing table (\d).*', line)
+                # if m:
+                #     phase_subphases[1] = max(phase_subphases[1], int(m.group(1)))
+
+                # Phase 2: "Backpropagating on table 2"
+                # m = re.match(r'^Backpropagating on table (\d).*', line)
+                # if m:
+                #     phase_subphases[2] = max(phase_subphases[2], 7 - int(m.group(1)))
+
+                # Phase 3: "Compressing tables 4 and 5"
+                # m = re.match(r'^Compressing tables (\d) and (\d).*', line)
+                # if m:
+                #     phase_subphases[3] = max(phase_subphases[3], int(m.group(1)))
 
                 # TODO also collect timing info:
 
