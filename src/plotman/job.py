@@ -298,21 +298,29 @@ class Job:
                 # subphases of phase 1
                 m = re.match(r'^\[P1\] Table (\d) took.*', line)
                 if m:
+                    if 1 not in phase_subphases:
+                        phase_subphases[1] = 0
                     phase_subphases[1] = max(phase_subphases[1], int(m.group(1)))
 
                 # subphases of phase 2
                 m = re.match(r'^\[P2\] Table (\d) scan took.*', line)
                 if m:
+                    if 2 not in phase_subphases:
+                        phase_subphases[2] = 0
                     phase_subphases[2] = max(phase_subphases[2], 7 - int(m.group(1)))
 
                 # subphases of phase 3
                 m = re.match(r'^\[P3-\d\] Table (\d) took.*', line)
                 if m:
+                    if 3 not in phase_subphases:
+                        phase_subphases[3] = 0
                     phase_subphases[3] = max(phase_subphases[3], int(m.group(1)))
 
                 # start of phase 4
                 m = re.match(r'^\[P4\] Starting to write C1 and C3 tables*', line)
                 if m:
+                    if 4 not in phase_subphases:
+                        phase_subphases[4] = 0
                     phase_subphases[4] = 0
 
                 # subphases of phase 4
