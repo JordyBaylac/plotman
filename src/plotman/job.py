@@ -18,6 +18,7 @@ import pendulum
 import psutil
 
 from plotman import chia
+from plotman import madmax
 
 
 def job_phases_for_tmpdir(d, all_jobs):
@@ -81,7 +82,7 @@ def parse_chia_plots_create_command_line(command_line):
     )
 
 class ParsedChiaPlotsCreateCommand:
-    def __init__(self, error, help, parameters):
+    def __init__(self, error, help=None, parameters=None):
         self.error = error
         self.help = help
         self.parameters = parameters
