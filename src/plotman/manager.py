@@ -178,7 +178,9 @@ def maybe_start_new_plot(dir_cfg, sched_cfg, plotting_cfg):
             #         '-b', str(plotting_cfg.job_buffer),
             #         '-t', tmpdir,
             #         '-d', dstdir ]
-            plot_args = ['~/chia-plotter/build/chia_plot',
+            chia_plotter = os.path.join(os.path.expanduser('~'), "chia-plotter/build/chia_plot")
+            print(f"trying plotter on dir: {chia_plotter}")
+            plot_args = [chia_plotter,
                     '-r', str(plotting_cfg.n_threads),
                     '-u', str(plotting_cfg.n_buckets),
                     '-t', tmpdir,
