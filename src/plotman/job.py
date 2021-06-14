@@ -29,14 +29,7 @@ def job_phases_for_dstdir(d, all_jobs):
     return sorted([j.progress() for j in all_jobs if j.dstdir == d])
 
 def is_plotting_cmdline(cmdline):
-    if cmdline and 'python' in cmdline[0].lower():
-        cmdline = cmdline[1:]
-    return (
-        len(cmdline) >= 3
-        and cmdline[0].endswith("chia")
-        and 'plots' == cmdline[1]
-        and 'create' == cmdline[2]
-    )
+    return cmdline and 'chia_plot' in cmdline[0].lower()
 
 def parse_chia_plot_time(s):
     # This will grow to try ISO8601 as well for when Chia logs that way
