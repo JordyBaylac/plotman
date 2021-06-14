@@ -45,7 +45,7 @@ def parse_chia_plot_time(s):
 def parse_chia_plots_create_command_line(command_line):
     command_line = list(command_line)
 
-    if 'chia_plot' not in arg.lower() for arg in command_line:
+    if 'chia_plot' not in [arg.lower() for arg in command_line]:
         return ParsedChiaPlotsCreateCommand(error="not a madmax plotter process")
     # Parse command line args
     # if 'python' in command_line[0].lower():
