@@ -183,8 +183,8 @@ def maybe_start_new_plot(dir_cfg, sched_cfg, plotting_cfg):
             plot_args = [chia_plotter,
                     '-r', str(plotting_cfg.n_threads),
                     '-u', str(plotting_cfg.n_buckets),
-                    '-t', tmpdir,
-                    '-d', dstdir]
+                    '-t', tmpdir if tmpdir.endswith("/") else (tmpdir+"/"),
+                    '-d', dstdir if dstdir.endswith("/") else (dstdir+"/")]
             # if plotting_cfg.e:
             #     plot_args.append('-e')
             if plotting_cfg.farmer_pk is not None:
