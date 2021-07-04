@@ -89,6 +89,7 @@ class Plotting:
     job_buffer: int
     farmer_pk: Optional[str] = None
     pool_pk: Optional[str] = None
+    contract: Optional[str] = None
 
 @attr.frozen
 class UserInterface:
