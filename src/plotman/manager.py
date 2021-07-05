@@ -81,12 +81,14 @@ def clean_old_files(dir_cfg):
     plots_id = [j.plot_id for j in jobs]
     temp_files = [f for d in dir_cfg.tmp for f in os.listdir(d)]
     cant = 0
+    to_delete = []
     for f in temp_files:
-        if (id in f for id in plots_id):
+        if (pid in f for pid in plots_id):
             cant += 1 # print("file %s is not used in any current job" % (f)) 
-            print(f"file {f} has {id}")
-    
-    print(f"checking plots id {plots_id}")
+        else:
+            to_delete.append(f)    
+
+    print(f"will delete {len(to_delete)} files")
     print(f"Same {cant} tmp files for {len(plots_id)} plots" if cant == len(temp_files) else "Nop (%s vs %s)"%(cant, len(temp_files)))
 
         
