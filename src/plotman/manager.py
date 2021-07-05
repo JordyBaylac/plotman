@@ -83,14 +83,18 @@ def clean_old_files(dir_cfg):
     cant = 0
     to_delete = []
     for f in temp_files:
-        if (pid in f for pid in plots_id):
-            cant += 1 # print("file %s is not used in any current job" % (f)) 
+        for pid in plots_id:
+            if pid in f:
+                cant += 1 # print("file %s is not used in any current job" % (f)) 
+                print(f"{f} has id {pid}")
+                break
         else:
             to_delete.append(f)    
 
-    print(f"will delete {len(to_delete)} files")
     print(f"Same {cant} tmp files for {len(plots_id)} plots" if cant == len(temp_files) else "Nop (%s vs %s)"%(cant, len(temp_files)))
-        
+    print(f"will delete {len(to_delete)} files")
+    for f in to_delete:
+        os.remove(f)        
 
 def drive_can_hold_new_plot(directory, dir_cfg, plotting_cfg):
     reason = ''
