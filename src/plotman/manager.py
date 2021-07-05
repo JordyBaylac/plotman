@@ -85,7 +85,7 @@ def clean_old_files(dir_cfg):
         if (id in f for id in plots_id):
             cant += 1 # print("file %s is not used in any current job" % (f)) 
     
-    print("Same" if cant == len(temp_files) else "Nop (%s vs %s)"%(cant, len(temp_files)))
+    print(f"Same {cant} files" if cant == len(temp_files) else "Nop (%s vs %s)"%(cant, len(temp_files)))
 
         
 
