@@ -157,9 +157,9 @@ def main():
     #
     if args.cmd == 'plot':
         
-        print('...starting plot loop')
         print('...cleaning old temp files')
         manager.clean_old_files(cfg.directories)
+        print('...starting plot loop')
 
         while True:
             manager.kill_frozen_jobs(cfg.directories)
