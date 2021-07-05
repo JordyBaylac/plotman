@@ -90,7 +90,6 @@ def clean_old_files(dir_cfg):
 
     print(f"will delete {len(to_delete)} files")
     print(f"Same {cant} tmp files for {len(plots_id)} plots" if cant == len(temp_files) else "Nop (%s vs %s)"%(cant, len(temp_files)))
-
         
 
 def drive_can_hold_new_plot(directory, dir_cfg, plotting_cfg):
