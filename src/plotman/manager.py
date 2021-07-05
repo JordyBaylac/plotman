@@ -79,20 +79,27 @@ def to_gigabytes(bytes):
 def clean_old_files(dir_cfg):
     jobs = job.Job.get_running_jobs(dir_cfg.log)
     plots_id = [j.plot_id for j in jobs]
-    temp_files = [f for d in dir_cfg.tmp for f in os.listdir(d)]
+
+    temp_files = []
+    for d in dir_cfg.tmp:
+        for f in os.listdir(d):
+            temp_files.append(os.path.abspath(f))
+
     cant = 0
     to_delete = []
     for f in temp_files:
         for pid in plots_id:
             if pid in f:
-                cant += 1 # print("file %s is not used in any current job" % (f)) 
-                print(f"{f} has id {pid}")
+                cant += 1
                 break
         else:
             to_delete.append(f)    
 
-    print(f"Same {cant} tmp files for {len(plots_id)} plots" if cant == len(temp_files) else "Nop (%s vs %s)"%(cant, len(temp_files)))
-    print(f"will delete {len(to_delete)} files")
+    if cant == len(temp_files):
+        print(f"All temp files are in use by {len(plots_id)} plots")
+    else:
+        print(f"A total of {len(to_delete)} temp files will be removed")
+
     for f in to_delete:
         os.remove(f)        
 
