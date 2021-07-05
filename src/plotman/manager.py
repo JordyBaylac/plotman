@@ -81,9 +81,9 @@ def clean_old_files(dir_cfg):
     plots_id = [j.plot_id for j in jobs]
 
     temp_files = []
-    for d in dir_cfg.tmp:
-        for f in os.listdir(d):
-            temp_files.append(os.path.abspath(f))
+    for temp in dir_cfg.tmp:
+        for f in os.listdir(temp):
+            temp_files.append(os.path.join(temp, f))
 
     cant = 0
     to_delete = []
