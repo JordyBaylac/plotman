@@ -35,9 +35,6 @@ def not_used_temp2dir(dirs, all_jobs):
         else:
             unused_dirs.append(d)
     
-    print('unused dirs')
-    print(unused_dirs)
-
     return unused_dirs[0] if len(unused_dirs) > 0 else None
 
 def withTrailingSlash(directory):
