@@ -120,7 +120,9 @@ def analyze(logfilenames, clipterminals, bytmp, bybitfield):
                     plot_util.human_format(statistics.stdev(values), 0)
                     ))
             elif(len(values) == 1):
-                row.append(f"{values[0]} ({values[0]/60} min)")
+                formated_seconds = round(values[0],2)
+                formated_minutes = round(values[0]/60,2)
+                row.append(f"{formated_seconds} ({formated_minutes} min)")
             else:
                 row.append('N/A')
 
