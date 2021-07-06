@@ -15,8 +15,6 @@ def analyze(logfilenames, clipterminals, bytmp, bybitfield):
             # Record of slicing and data associated with the slice
             sl = 'x'         # Slice key
             phase_time = {}  # Map from phase index to time
-            n_sorts = 0
-            n_uniform = 0
             is_first_last = False
 
             # Read the logfile, triggering various behaviors on various
@@ -25,13 +23,11 @@ def analyze(logfilenames, clipterminals, bytmp, bybitfield):
                 # Beginning of plot job.  We may encounter this multiple
                 # times, if a job was run with -n > 1.  Sample log line:
                 # 2021-04-08T13:33:43.542  chia.plotting.create_plots       : INFO     Starting plot 1/5
-                m = re.search(r'Starting plot (\d*)/(\d*)', line)
+                m = re.search(r'Crafting plot (\d*) out of (\d*)', line)
                 if m:
                     # (re)-initialize data structures
                     sl = 'x'         # Slice key
                     phase_time = {}  # Map from phase index to time
-                    n_sorts = 0
-                    n_uniform = 0
 
                     seq_num = int(m.group(1))
                     seq_total = int(m.group(2))
@@ -39,28 +35,28 @@ def analyze(logfilenames, clipterminals, bytmp, bybitfield):
 
                 # Temp dirs.  Sample log line:
                 # Starting plotting progress into temporary dirs: /mnt/tmp/01 and /mnt/tmp/a
-                m = re.search(r'^Starting plotting.*dirs: (.*) and (.*)', line)
-                if m:
-                    # Record tmpdir, if slicing by it
-                    if bytmp:
-                        tmpdir = m.group(1)
-                        sl += '-' + tmpdir
+                # m = re.search(r'^Starting plotting.*dirs: (.*) and (.*)', line)
+                # if m:
+                #     # Record tmpdir, if slicing by it
+                #     if bytmp:
+                #         tmpdir = m.group(1)
+                #         sl += '-' + tmpdir
 
                 # Bitfield marker.  Sample log line(s):
                 # Starting phase 2/4: Backpropagation without bitfield into tmp files... Mon Mar  1 03:56:11 2021
                 #   or
                 # Starting phase 2/4: Backpropagation into tmp files... Fri Apr  2 03:17:32 2021
-                m = re.search(r'^Starting phase 2/4: Backpropagation', line)
-                if bybitfield and m:
-                    if 'without bitfield' in line:
-                        sl += '-nobitfield'
-                    else:
-                        sl += '-bitfield'
+                # m = re.search(r'^Starting phase 2/4: Backpropagation', line)
+                # if bybitfield and m:
+                #     if 'without bitfield' in line:
+                #         sl += '-nobitfield'
+                #     else:
+                #         sl += '-bitfield'
 
                 # Phase timing.  Sample log line:
                 # Time for phase 1 = 22796.7 seconds. CPU (98%) Tue Sep 29 17:57:19 2020
                 for phase in ['1', '2', '3', '4']:
-                    m = re.search(r'^Time for phase ' + phase + ' = (\d+.\d+) seconds..*', line)
+                    m = re.search(r'^Phase ' + phase + ' took (\d+.\d+) sec*', line)
                     if m:
                         phase_time[phase] = float(m.group(1))
 
@@ -70,16 +66,16 @@ def analyze(logfilenames, clipterminals, bytmp, bybitfield):
                 # ....?....
                 #   or
                 # Bucket 511 QS. Ram: 0.920GiB, u_sort min: 0.375GiB, qs min: 0.094GiB. force_qs: 1
-                m = re.search(r'Bucket \d+ ([^\.]+)\..*', line)
-                if m and not 'force_qs' in line:
-                    sorter = m.group(1)
-                    n_sorts += 1
-                    if sorter == 'uniform sort':
-                        n_uniform += 1
-                    elif sorter == 'QS':
-                        pass
-                    else:
-                        print ('Warning: unrecognized sort ' + sorter)
+                # m = re.search(r'Bucket \d+ ([^\.]+)\..*', line)
+                # if m and not 'force_qs' in line:
+                #     sorter = m.group(1)
+                #     n_sorts += 1
+                #     if sorter == 'uniform sort':
+                #         n_uniform += 1
+                #     elif sorter == 'QS':
+                #         pass
+                #     else:
+                #         print ('Warning: unrecognized sort ' + sorter)
 
                 # Job completion.  Record total time in sliced data store.
                 # Sample log line:
@@ -92,16 +88,16 @@ def analyze(logfilenames, clipterminals, bytmp, bybitfield):
                         data.setdefault(sl, {}).setdefault('total time', []).append(float(m.group(1)))
                         for phase in ['1', '2', '3', '4']:
                             data.setdefault(sl, {}).setdefault('phase ' + phase, []).append(phase_time[phase])
-                        data.setdefault(sl, {}).setdefault('%usort', []).append(100 * n_uniform // n_sorts)
+                        # data.setdefault(sl, {}).setdefault('%usort', []).append(100 * n_uniform // n_sorts)
 
     # Prepare report
     tab = tt.Texttable()
-    all_measures = ['%usort', 'phase 1', 'phase 2', 'phase 3', 'phase 4', 'total time']
-    headings = ['Slice', 'n'] + all_measures
+    all_measures = ['phase 1', 'phase 2', 'phase 3', 'phase 4', 'total time']
+    headings = ['n'] + all_measures
     tab.header(headings)
 
     for sl in data.keys():
-        row = [sl]
+        row = []
 
         # Sample size
         sample_sizes = []
