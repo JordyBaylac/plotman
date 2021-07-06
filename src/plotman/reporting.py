@@ -77,8 +77,8 @@ def status_report(jobs, width, height=None, tmp_prefix='', dst_prefix=''):
         n_end_rows = n_rows - n_begin_rows
 
     tab = tt.Texttable()
-    headings = ['plot id', 'k', 'tmp', 'dst', 'wall', 'phase', 'tmp',
-            'pid', 'stat', 'mem', 'user', 'sys', 'io', 'frozen', 'logfile']
+    headings = ['plot id', 'tmp', 'tmp2', 'dst', 'wall', 'phase', 'tmp',
+            'pid', 'stat', 'mem', 'io', 'frozen', 'logfile']
     if height:
         headings.insert(0, '#')
     tab.header(headings)
@@ -98,8 +98,8 @@ def status_report(jobs, width, height=None, tmp_prefix='', dst_prefix=''):
             try:
                 with j.proc.oneshot():
                     row = [j.plot_id[:8],
-                        j.k,
                         abbr_path(j.tmpdir, tmp_prefix),
+                        abbr_path(j.tmp2dir, tmp_prefix),
                         abbr_path(j.dstdir, dst_prefix),
                         plot_util.time_format(j.get_time_wall()),
                         phase_str(j.progress()),
@@ -107,8 +107,6 @@ def status_report(jobs, width, height=None, tmp_prefix='', dst_prefix=''):
                         j.proc.pid,
                         j.get_run_status(),
                         plot_util.human_format(j.get_mem_usage(), 1),
-                        plot_util.time_format(j.get_time_user()),
-                        plot_util.time_format(j.get_time_sys()),
                         plot_util.time_format(j.get_time_iowait()),
                         plot_util.is_frozen(j),
                         os.path.basename(j.logfile)
