@@ -85,6 +85,12 @@ def clean_old_files(dir_cfg):
         for f in os.listdir(temp):
             temp_files.append(os.path.join(temp, f))
 
+    for temp in dir_cfg.tmp2:
+        if temp in dir_cfg.tmp:
+            continue
+        for f in os.listdir(temp):
+            temp_files.append(os.path.join(temp, f))
+
     cant = 0
     to_delete = []
     for f in temp_files:
