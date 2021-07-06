@@ -115,10 +115,11 @@ def analyze(logfilenames, clipterminals, bytmp, bybitfield):
         for measure in all_measures:
             values = data.get(sl, {}).get(measure, [])
             if(len(values) > 1):
-                row.append('μ=%s σ=%s' % (
-                    plot_util.human_format(statistics.mean(values), 1),
-                    plot_util.human_format(statistics.stdev(values), 0)
-                    ))
+                mean_values = statistics.mean(values)
+                row_str = 'μ=%s' % round(mean_values, 2)
+                if measure == 'total time':
+                    row_str += f" ({round(mean_values/60,2)} min)"
+                row.append(row_str)    
             elif(len(values) == 1):
                 formated_seconds = round(values[0],2)
                 formated_minutes = round(values[0]/60,2)
