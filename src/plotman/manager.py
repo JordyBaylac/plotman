@@ -202,8 +202,8 @@ def maybe_start_new_plot(dir_cfg, sched_cfg, plotting_cfg):
             plot_args = [chia_plotter,
                     '-r', str(plotting_cfg.n_threads),
                     '-u', str(plotting_cfg.n_buckets),
-                    '-t', tmpdir if tmpdir.endswith("/") else (tmpdir+"/"),
-                    '-d', dstdir if dstdir.endswith("/") else (dstdir+"/")]
+                    '-t', withTrailingSlash(tmpdir),
+                    '-d', withTrailingSlash(dstdir)]
             # if plotting_cfg.e:
             #     plot_args.append('-e')
             if plotting_cfg.farmer_pk is not None:
@@ -214,7 +214,7 @@ def maybe_start_new_plot(dir_cfg, sched_cfg, plotting_cfg):
                 plot_args.append(plotting_cfg.pool_pk)
             if dir_cfg.tmp2 is not None:
                 plot_args.append('-2')
-                plot_args.append(tmp2dir) #dir_cfg.tmp2
+                plot_args.append(withTrailingSlash(tmp2dir)) #dir_cfg.tmp2
             if plotting_cfg.contract is not None:
                 plot_args.append('-c')
                 plot_args.append(plotting_cfg.contract)
@@ -266,3 +266,6 @@ def select_jobs_by_partial_id(jobs, partial_id):
         if j.plot_id.startswith(partial_id):
             selected.append(j)
     return selected
+
+def withTrailingSlash(directory):
+    return directory if directory.endswith("/") else (directory+"/")
