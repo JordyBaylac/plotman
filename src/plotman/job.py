@@ -30,7 +30,7 @@ def not_used_temp2dir(dirs, all_jobs):
     unused_dirs = [ ]
     for d in dirs:
         for j in all_jobs:
-            if j.tmp2dir == d:
+            if withTrailingSlash(j.tmp2dir) == withTrailingSlash(d):
                 break
         else:
             unused_dirs.append(d)
@@ -39,6 +39,9 @@ def not_used_temp2dir(dirs, all_jobs):
     print(unused_dirs)
 
     return unused_dirs[0] if len(unused_dirs) > 0 else None
+
+def withTrailingSlash(directory):
+    return directory if directory.endswith("/") else (directory+"/")
 
 def job_phases_for_dstdir(d, all_jobs):
     '''Return phase 2-tuples for jobs outputting to dstdir d'''
