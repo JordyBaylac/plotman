@@ -25,6 +25,10 @@ def job_phases_for_tmpdir(d, all_jobs):
     '''Return phase 2-tuples for jobs running on tmpdir d'''
     return sorted([j.progress() for j in all_jobs if j.tmpdir == d])
 
+def job_phases_for_tmp2dir(d, all_jobs):
+    '''Return phase 2-tuples for jobs running on tmp2dir d'''
+    return sorted([j.progress() for j in all_jobs if j.tmp2dir == d])
+
 def job_phases_for_dstdir(d, all_jobs):
     '''Return phase 2-tuples for jobs outputting to dstdir d'''
     return sorted([j.progress() for j in all_jobs if j.dstdir == d])
