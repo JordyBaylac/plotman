@@ -208,6 +208,7 @@ def maybe_start_new_plot(dir_cfg, sched_cfg, plotting_cfg):
                     '-r', str(plotting_cfg.n_threads),
                     '-u', str(plotting_cfg.n_buckets),
                     '-t', withTrailingSlash(tmpdir),
+                    '-2', withTrailingSlash(tmp2dir),
                     '-d', withTrailingSlash(dstdir)]
             # if plotting_cfg.e:
             #     plot_args.append('-e')
@@ -217,9 +218,6 @@ def maybe_start_new_plot(dir_cfg, sched_cfg, plotting_cfg):
             if plotting_cfg.pool_pk is not None:
                 plot_args.append('-p')
                 plot_args.append(plotting_cfg.pool_pk)
-            if dir_cfg.tmp2 is not None:
-                plot_args.append('-2')
-                plot_args.append(withTrailingSlash(tmp2dir)) #dir_cfg.tmp2
             if plotting_cfg.contract is not None:
                 plot_args.append('-c')
                 plot_args.append(plotting_cfg.contract)

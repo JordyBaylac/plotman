@@ -27,7 +27,6 @@ def job_phases_for_tmpdir(d, all_jobs):
 
 def not_used_temp2dir(dirs, all_jobs):
     '''Return not used dirs by any of the jobs'''
-
     unused_dirs = [ ]
     for d in dirs:
         for j in all_jobs:
@@ -36,6 +35,9 @@ def not_used_temp2dir(dirs, all_jobs):
         else:
             unused_dirs.append(d)
     
+    print('unused dirs')
+    print(unused_dirs)
+
     return unused_dirs[0] if len(unused_dirs) > 0 else None
 
 def job_phases_for_dstdir(d, all_jobs):
