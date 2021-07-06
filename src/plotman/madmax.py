@@ -47,6 +47,7 @@ commands = MadmaxCommands()
     show_default=True,
 )
 @click.option("-p", "--poolkey", help="Pool Public Key (48 bytes)", type=str, default=None)
+@click.option("-c", "--contract", help="Pool Contract Address (64 chars)", type=str, default=None)
 @click.option("-f", "--farmerkey", help="Farmer Public Key (48 bytes)", type=str, default=None)
 def _cli():
     pass
