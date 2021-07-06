@@ -167,17 +167,16 @@ def maybe_start_new_plot(dir_cfg, sched_cfg, plotting_cfg):
                 if phases_permit_new_job(phases, d, sched_cfg, dir_cfg) ]
         rankable = [ (d, phases[0]) if phases else (d, job.Phase(known=False))
                 for (d, phases) in eligible ]
-
-        tmp2_to_all_phases = [(d, job.job_phases_for_tmp2dir(d, jobs)) for d in dir_cfg.tmp2]
-        rankable2 = [ (d, phases[0]) if phases else (d, job.Phase(known=False))
-                for (d, phases) in tmp2_to_all_phases ]
         
-        if not eligible:
+        tmp2dir = job.not_used_temp2dir(dir_cfg.tmp2, jobs)
+
+        if tmp2dir is None:
+            wait_reason = 'no elegible tmp2dir'
+        elif not eligible:
             wait_reason = 'no eligible tempdirs (%ds/%ds)' % (youngest_job_age, global_stagger)
         else:
             # Plot to oldest tmpdir.
             tmpdir = max(rankable, key=operator.itemgetter(1))[0]
-            tmp2dir = max(rankable2, key=operator.itemgetter(1))[0]
 
             # Select the dst dir least recently selected
             dir2ph = { d:ph for (d, ph) in dstdirs_to_youngest_phase(jobs).items()
