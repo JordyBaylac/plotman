@@ -56,7 +56,7 @@ def analyze(logfilenames, clipterminals, bytmp, bybitfield):
                 # Phase timing.  Sample log line:
                 # Time for phase 1 = 22796.7 seconds. CPU (98%) Tue Sep 29 17:57:19 2020
                 for phase in ['1', '2', '3', '4']:
-                    m = re.search(r'^Phase ' + phase + ' took (\d+.\d+) sec*', line)
+                    m = re.search(r'^Phase ' + phase + ' took (\d+.\d+) sec', line)
                     if m:
                         phase_time[phase] = float(m.group(1))
 
@@ -80,7 +80,7 @@ def analyze(logfilenames, clipterminals, bytmp, bybitfield):
                 # Job completion.  Record total time in sliced data store.
                 # Sample log line:
                 # Total time = 49487.1 seconds. CPU (97.26%) Wed Sep 30 01:22:10 2020
-                m = re.search(r'^Total time = (\d+.\d+) seconds.*', line)
+                m = re.search(r'^Total plot creation time was (\d+.\d+) sec*', line)
                 if m:
                     if clipterminals and is_first_last:
                         pass  # Drop this data; omit from statistics.
