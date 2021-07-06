@@ -101,10 +101,10 @@ def clean_old_files(dir_cfg):
         else:
             to_delete.append(f)    
 
-    if cant == len(temp_files):
+    if cant == len(temp_files) and cant > 0:
         print(f"All temp files are in use by {len(plots_id)} plots")
     else:
-        print(f"A total of {len(to_delete)} temp files will be removed")
+        print(f"{len(to_delete)} temp files will be removed")
 
     for f in to_delete:
         os.remove(f)        
