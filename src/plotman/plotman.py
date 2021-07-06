@@ -156,7 +156,11 @@ def main():
     # Stay alive, spawning plot jobs
     #
     if args.cmd == 'plot':
+        
+        print('...cleaning old temp files')
+        manager.clean_old_files(cfg.directories)
         print('...starting plot loop')
+
         while True:
             manager.kill_frozen_jobs(cfg.directories)
             (started, reason) = manager.maybe_start_new_plot(cfg.directories, cfg.scheduling, cfg.plotting)

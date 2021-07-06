@@ -79,15 +79,29 @@ def to_gigabytes(bytes):
 def clean_old_files(dir_cfg):
     jobs = job.Job.get_running_jobs(dir_cfg.log)
     plots_id = [j.plot_id for j in jobs]
-    temp_files = [f for d in dir_cfg.tmp for f in os.listdir(d)]
-    cant = 0
-    for f in temp_files:
-        if (id in f for id in plots_id):
-            cant += 1 # print("file %s is not used in any current job" % (f)) 
-    
-    print("Same" if cant == len(temp_files) else "Nop (%s vs %s)"%(cant, len(temp_files)))
 
-        
+    temp_files = []
+    for temp in dir_cfg.tmp:
+        for f in os.listdir(temp):
+            temp_files.append(os.path.join(temp, f))
+
+    cant = 0
+    to_delete = []
+    for f in temp_files:
+        for pid in plots_id:
+            if pid in f:
+                cant += 1
+                break
+        else:
+            to_delete.append(f)    
+
+    if cant == len(temp_files):
+        print(f"All temp files are in use by {len(plots_id)} plots")
+    else:
+        print(f"A total of {len(to_delete)} temp files will be removed")
+
+    for f in to_delete:
+        os.remove(f)        
 
 def drive_can_hold_new_plot(directory, dir_cfg, plotting_cfg):
     reason = ''
@@ -196,6 +210,9 @@ def maybe_start_new_plot(dir_cfg, sched_cfg, plotting_cfg):
             if dir_cfg.tmp2 is not None:
                 plot_args.append('-2')
                 plot_args.append(dir_cfg.tmp2)
+            if plotting_cfg.contract is not None:
+                plot_args.append('-c')
+                plot_args.append(plotting_cfg.contract)
 
             logmsg = ('Starting plot job: %s ; logging to %s' % (' '.join(plot_args), logfile))
 
