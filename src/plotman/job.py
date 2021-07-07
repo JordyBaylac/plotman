@@ -42,7 +42,7 @@ def next_available_temp2dir(dirs, all_jobs):
     if len(unused_dirs) == 0 and len(used_dirs) > 0:
         running_jobs = [j for j in all_jobs if withTrailingSlash(j.tmp2dir) in used_dirs]
         running_jobs.sort(key=lambda j: j.progress(), reverse=True)
-        unused = running_jobs[0]
+        unused = running_jobs[0].tmp2dir
 
     return unused
 
