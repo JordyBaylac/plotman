@@ -17,7 +17,7 @@ import click
 import pendulum
 import psutil
 
-from plotman import chia
+from plotman import chia, plot_util
 from plotman import madmax
 
 
@@ -40,7 +40,7 @@ def next_available_temp2dir(dirs, all_jobs):
     
     unused = None
     if len(unused_dirs) == 0 and len(used_dirs) > 0:
-        running_jobs = [j for j in all_jobs if withTrailingSlash(j.tmp2dir) in used_dirs]
+        running_jobs = [j for j in all_jobs if withTrailingSlash(j.tmp2dir) in used_dirs and plot_util.df_b(j.tmp2dir) > 1.0737E+11]
         running_jobs.sort(key=lambda j: j.progress(), reverse=True)
         unused = running_jobs[0].tmp2dir
 
