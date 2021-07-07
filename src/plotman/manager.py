@@ -168,7 +168,7 @@ def maybe_start_new_plot(dir_cfg, sched_cfg, plotting_cfg):
         rankable = [ (d, phases[0]) if phases else (d, job.Phase(known=False))
                 for (d, phases) in eligible ]
         
-        tmp2dir = job.not_used_temp2dir(dir_cfg.tmp2, jobs)
+        tmp2dir = job.next_available_temp2dir(dir_cfg.tmp2, jobs)
 
         if tmp2dir is None:
             wait_reason = 'no elegible tmp2dir'

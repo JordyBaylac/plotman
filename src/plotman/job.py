@@ -25,17 +25,26 @@ def job_phases_for_tmpdir(d, all_jobs):
     '''Return phase 2-tuples for jobs running on tmpdir d'''
     return sorted([j.progress() for j in all_jobs if j.tmpdir == d])
 
-def not_used_temp2dir(dirs, all_jobs):
+def next_available_temp2dir(dirs, all_jobs):
     '''Return not used dirs by any of the jobs'''
-    unused_dirs = [ ]
+    unused_dirs = []
+    used_dirs = []
     for d in dirs:
+        safe_d = withTrailingSlash(d)
         for j in all_jobs:
-            if withTrailingSlash(j.tmp2dir) == withTrailingSlash(d):
+            if withTrailingSlash(j.tmp2dir) == safe_d:
+                used_dirs.append(safe_d)
                 break
         else:
-            unused_dirs.append(d)
+            unused_dirs.append(safe_d)
     
-    return unused_dirs[0] if len(unused_dirs) > 0 else None
+    unused = None
+    if len(unused_dirs) == 0 and len(used_dirs) > 0:
+        running_jobs = [j for j in all_jobs if withTrailingSlash(j.tmp2dir) in used_dirs]
+        running_jobs.sort(key=lambda j: j.progress(), reverse=True)
+        unused = running_jobs[0]
+
+    return unused
 
 def withTrailingSlash(directory):
     return directory if directory.endswith("/") else (directory+"/")
