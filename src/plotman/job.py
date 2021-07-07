@@ -38,8 +38,8 @@ def next_available_temp2dir(dirs, all_jobs):
         else:
             unused_dirs.append(safe_d)
     
-    unused = None
-    if len(unused_dirs) == 0 and len(used_dirs) > 0:
+    unused = unused_dirs[0] if len(unused_dirs) > 0 else None
+    if unused is None and len(used_dirs) > 0:
         sorted_jobs = [j for j in all_jobs if withTrailingSlash(j.tmp2dir) in used_dirs and plot_util.df_b(j.tmp2dir) > 1.0737E+11]
         sorted_jobs.sort(key=lambda j: j.progress(), reverse=True)
         unused = sorted_jobs[0].tmp2dir if len(sorted_jobs) > 0 else None
